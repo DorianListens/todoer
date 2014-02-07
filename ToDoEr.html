@@ -1,0 +1,39 @@
+<!-- This is the app template HTML file -->
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ToDoEr</title>
+    <link rel="stylesheet" href="stylesheets/app.css" />
+    <script src="bower_components/modernizr/modernizr.js"></script>
+  </head>
+  <body>
+  	<div class="row">
+  		<div class="large-12 columns"> <h1>ToDoEr</h1></div>
+  	</div>
+
+		<div id="mod" class="reveal-modal" data-reveal>
+		<h2>New Task:</h2>
+		<input type="text" id="taskInput"></input>
+		<a id="submitter" class="button">Submit Task</a>
+		<a class="close-reveal-modal">&#215;</a>
+		</div>
+
+
+  	<div class="row">
+  		<div class="panel" id="theplace">
+  		</div>
+  	</div>
+
+
+ 	<script src="bower_components/jquery/jquery.js"></script>
+ 	<script src="bower_components/underscore/underscore.js"></script>
+ 	<script src="bower_components/backbone/backbone.js"></script>
+    <script src="bower_components/foundation/js/foundation.min.js"></script>
+    <script src="js/todoer.js"></script>
+    <script src="js/app.js"></script>
+    
+  </body>
+</html>
