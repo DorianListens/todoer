@@ -8,18 +8,36 @@
     <title>ToDoEr</title>
     <link rel="stylesheet" href="stylesheets/app.css" />
     <script src="bower_components/modernizr/modernizr.js"></script>
+    <style>
+    .done {
+    	text-decoration: line-through;
+    	color: red;
+    }
+    div.itemView div > input.edit {
+    	display: none;
+    }
+    div.editing div > input.edit {
+    	display: block!important;
+    }
+    div.editing > #info {
+    	display: none;
+    }
+
+    </style>
   </head>
   <body>
-  	<div class="row">
-  		<div class="large-12 columns"> <h1>ToDoEr</h1></div>
-  	</div>
 
-		<div id="mod" class="reveal-modal" data-reveal>
+		<div id="mod" class="reveal-modal small" data-reveal>
 		<h2>New Task:</h2>
 		<input type="text" id="taskInput"></input>
 		<a id="submitter" class="button">Submit Task</a>
 		<a class="close-reveal-modal">&#215;</a>
 		</div>
+
+
+  	<div class="row">
+  		<div class="large-12 columns"> <h1>ToDoEr</h1></div>
+  	</div>
 
 
   	<div class="row">

@@ -16,10 +16,18 @@
 
       Item.prototype.defaults = function() {
         return {
-          part1: 'Default Task',
+          task: 'Default Task.',
           part2: 'Go do it!',
+          done: false,
+          order: toDoListView.nextOrder,
           count: 0
         };
+      };
+
+      Item.prototype.toggle = function() {
+        return this.save({
+          done: !this.get('done')
+        });
       };
 
       return Item;
@@ -35,6 +43,27 @@
 
       List.prototype.model = Item;
 
+      List.prototype.done = function() {
+        return this.where({
+          done: true
+        });
+      };
+
+      List.prototype.remaining = function() {
+        return this.where({
+          done: false
+        });
+      };
+
+      List.prototype.nextOrder = function() {
+        if (!this.length) {
+          1;
+          return this.last().get('order' + 1);
+        }
+      };
+
+      List.prototype.comparator = 'order';
+
       return List;
 
     })(Backbone.Collection);
@@ -42,21 +71,28 @@
       __extends(itemView, _super);
 
       function itemView() {
+        this.updateOnEnter = __bind(this.updateOnEnter, this);
+        this.close = __bind(this.close, this);
+        this.edit = __bind(this.edit, this);
         this.unrender = __bind(this.unrender, this);
         _ref2 = itemView.__super__.constructor.apply(this, arguments);
         return _ref2;
       }
 
-      itemView.prototype.tagName = 'li';
+      itemView.prototype.tagName = 'div';
+
+      itemView.prototype.className = 'row itemView';
 
       itemView.prototype.initialize = function() {
-        _.bindAll(this, 'render', 'unrender', 'swap', 'cross', 'remove');
+        _.bindAll(this, 'render', 'unrender', 'cross', 'remove', 'edit', 'updateOnEnter', 'close');
         this.model.bind('change', this.render);
         return this.model.bind('remove', this.unrender);
       };
 
       itemView.prototype.render = function() {
-        $(this.el).html("<span id=\"" + (this.model.get('count')) + "\">" + (this.model.get('part1')) + " " + (this.model.get('part2')) + "</span>\n<span class=\"swap button tiny secondary\">done</span>\n<span class=\"delete button tiny alert\">delete</span>");
+        $(this.el).html("<div class=\"small-6 columns\"><input class=\"edit\" type=\"text\" value = \"" + (this.model.get('task')) + "\"/></div>\n<div id=\"info\" class=\"small-6 columns\">" + (this.model.get('task')) + " " + (this.model.get('part2')) + "</div>\n<div class=\"small-4 columns small-offset-2\">\n	<span class=\"cross button tiny secondary\">done</span>\n	<span class=\"delete button tiny alert\">delete</span>\n</div>	");
+        this.$('#info').toggleClass('done', this.model.get('done'));
+        this.input = this.$.edit;
         return this;
       };
 
@@ -64,15 +100,32 @@
         return $(this.el).remove();
       };
 
-      itemView.prototype.swap = function() {
-        return this.model.set({
-          part1: this.model.get('part2'),
-          part2: this.model.get('part1')
-        });
+      itemView.prototype.edit = function() {
+        this.$el.toggleClass('editing');
+        return this.$('input').focus();
+      };
+
+      itemView.prototype.close = function() {
+        var value;
+        value = this.input.val();
+        if (!value) {
+          return this.remove;
+        } else {
+          this.model.save({
+            task: value
+          });
+          return this.$el.toggleClass('editing');
+        }
+      };
+
+      itemView.prototype.updateOnEnter = function(e) {
+        if (e.keyCode === 13) {
+          return this.close;
+        }
       };
 
       itemView.prototype.cross = function() {
-        return $(this.el).css('text-decoration', 'line-through');
+        return this.model.toggle();
       };
 
       itemView.prototype.remove = function() {
@@ -80,8 +133,11 @@
       };
 
       itemView.prototype.events = {
-        'click .swap': 'cross',
-        'click .delete': 'remove'
+        'click .cross': 'cross',
+        'click .delete': 'remove',
+        'dblclick #info': 'edit',
+        'keypress .edit': 'updateOnEnter',
+        'blur .edit': 'updateOnEnter'
       };
 
       return itemView;
@@ -103,7 +159,7 @@
         this.collection = new List;
         this.collection.bind('add', this.appendItem);
         $('#submitter').click(function() {
-          _this.theStuff = document.getElementById('taskInput').value;
+          _this.theTask = document.getElementById('taskInput').value;
           $('#taskInput').val('');
           $('#mod').foundation('reveal', 'close');
           return _this.addItem();
@@ -113,15 +169,19 @@
       };
 
       toDoListView.prototype.render = function() {
-        return $(this.el).append("<a href=\"#\" class=\"button newTask\" data-reveal-id=\"mod\">New Task</a>\n<ul></ul>");
+        return $(this.el).append("<a href=\"#\" class=\"button newTask\" data-reveal-id=\"mod\">New Task</a>\n	<div class=\"row\">\n		<div class=\"small-6 columns\"><h2>Task Name</h2></div>\n		<div class=\"small-4 small-offset-2 columns\"><h2>Task Actions</h2></div>\n		<hr /></div>\n\n<ul></ul>");
       };
 
       toDoListView.prototype.addItem = function() {
         var item;
         this.counter++;
         item = new Item;
+        if (this.theTask) {
+          item.set({
+            task: "" + this.theTask + "!"
+          });
+        }
         item.set({
-          part1: "" + this.theStuff + "!",
           part2: "" + (item.get('part2')) + " (" + this.counter + ")",
           count: this.counter
         });
